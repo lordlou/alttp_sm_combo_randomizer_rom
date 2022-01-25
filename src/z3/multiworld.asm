@@ -308,12 +308,12 @@ alttp_multiworld_dialog:
     and #$00ff
     asl #4 : tax
     
+    lda #$0000
 -    
+    pha
     phx
     lda.l rando_player_table, x
     and #$00ff
-    cmp #$0000                  ; FIXME: this will break if we use extended player data (needs to be fixed by then)
-    beq ++
     tax
     lda.l alttp_dialog_char_table-$20, x
     and #$00ff
@@ -323,9 +323,11 @@ alttp_multiworld_dialog:
     iny #2
     plx
     inx
-    bra -
+    pla
+    inc
+    cmp #$0010
+    bne -
 ++
-    plx
     tyx
     lda #$FF00
     sta.l $7f1200, x
@@ -373,7 +375,7 @@ alttp_mw_item_names:
     db "   Super Missiles  ", $00
     db "    Power Bombs    ", $00
 
-    db "                   ", $00  ;15
+    db "     Something     ", $00  ;15
     db "                   ", $00  ;16
     db "                   ", $00  ;17
     db "                   ", $00  ;18

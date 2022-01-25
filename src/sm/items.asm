@@ -107,7 +107,7 @@ item_graphics:
     dw $000C : db $00, $00, $00, $00, $00, $00, $00, $00    ; Super Missile
     dw $000E : db $00, $00, $00, $00, $00, $00, $00, $00    ; Power Bomb
     
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C5 - Unused
+    dw $8700 : db $00, $00, $00, $00, $00, $00, $00, $00    ; Morph ball
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C6 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C7 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C8 - Unused
@@ -195,7 +195,7 @@ item_graphics:
     dw $C800 : db $03, $03, $03, $03, $03, $03, $03, $03        ; 1E Flippers
     dw $C900 : db $02, $02, $02, $02, $02, $02, $02, $02        ; 1F Moon Pearl
 
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 20 Dummy     
+    dw $B500 : db $01, $01, $01, $01, $01, $01, $01, $01        ; 20 Dummy     
     dw $B800 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 21 Bug-Catching Net
     dw $CD00 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 22 Blue Tunic
     dw $CE00 : db $01, $01, $01, $01, $01, $01, $01, $01        ; 23 Red Tunic
@@ -375,7 +375,7 @@ sm_item_table:
     dw $89A9, $0005, $0000, $0001, $0000, $0000, $E0CA, #p_missile_hloop    ; Missiles
     dw $89D2, $0005, $0000, $0002, $0000, $0000, $E0EF, #p_super_hloop      ; Super Missiles
     dw $89FB, $0005, $0000, $0003, $0000, $0000, $E114, #p_pb_hloop         ; Power Bombs
-
+    dw $88F3, $0004, $0009, $0004, $0000, $0000, $0000, $0000      ; Morph ball
 
 progressive_items:
     db $5e, $59, $04, $49, $01, $02, $03, $00     ; Progressive sword
@@ -633,8 +633,8 @@ i_pickup:
     lda $1dc7, x              ; Load PLM room argument
     asl #3 : tax
 
-    lda.l rando_item_table, x       ; Load item type
-    beq .own_item
+    ; lda.l rando_item_table, x       ; Load item type
+    ; beq .own_item
 
 .multiworld_item                    ; This is someone elses item, send message
     phx
@@ -643,15 +643,18 @@ i_pickup:
     lda.l rando_item_table+$2, x    ; Load original item id into X
     tax
     pla                             ; Multiworld item table id in A
-    phx : phy
+    phx : phy : pha
     jsl mw_write_message            ; Send message
+    plx
+    lda.l rando_item_table, x       ; Load item type
+    beq .own_item
     ply : plx
     jsl sm_mw_display_item_sent     ; Display custom message box
     plx
     bra .end
 
 .own_item
-    plx
+    ply : plx : plx
     lda !ITEM_PLM_BUF, x        ; Load adjusted item id (progression etc)
     cmp #$0040
     bcc .smItem
@@ -1787,7 +1790,7 @@ item_names:
     dw "___       Super Missiles     ___"
     dw "___        Power Bombs       ___"
 
-    dw "___                          ___"  ;15
+    dw "___        Something         ___"  ;15
     dw "___                          ___"  ;16
     dw "___                          ___"  ;17
     dw "___                          ___"  ;18
@@ -2221,11 +2224,11 @@ write_placeholders:
     asl : tax               ; Put char table offset in X
     lda char_table-$40, x 
     tyx
-    sta.l $7e3314, x
+    sta.l $7e3310, x        ; 16 bytes player name now instead of 12
     iny #2
     plx
     inx
-    cpy #$0018
+    cpy #$0020              ; 16 bytes player name now instead of 12
     bne -
     rep #$30
 
