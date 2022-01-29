@@ -65,7 +65,13 @@ alttp_multiworld_replace_item:
 .ownItem
     lda.l alttp_rando_item_table+$2, x
     sta !MULTIWORLD_GIVE_ITEM
+    pha
+    cmp #$006B                      ; 6B is a foreign item that can be progression or not
+    bne +
+    clc : adc.l alttp_rando_item_table+$6, x; add one if off-world item isnt progression
++
     sta !MULTIWORLD_DIALOG_ITEM
+    pla
 .noReplace
     plp : ply : plx
 .end
@@ -375,7 +381,7 @@ alttp_mw_item_names:
     db "   Super Missiles  ", $00
     db "    Power Bombs    ", $00
 
-    db "     Something     ", $00  ;15
+    db "                   ", $00  ;15
     db "                   ", $00  ;16
     db "                   ", $00  ;17
     db "                   ", $00  ;18
@@ -512,8 +518,8 @@ alttp_mw_item_names:
     db "                   ", $00
     db "                   ", $00
     db "                   ", $00
-    db "                   ", $00
-    db "                   ", $00
+    db " something useful  ", $00
+    db "    a junk item    ", $00
     db "                   ", $00
     db "                   ", $00
     db "                   ", $00 ; 6F 

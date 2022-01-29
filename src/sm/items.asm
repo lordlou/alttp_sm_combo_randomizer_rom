@@ -107,7 +107,7 @@ item_graphics:
     dw $000C : db $00, $00, $00, $00, $00, $00, $00, $00    ; Super Missile
     dw $000E : db $00, $00, $00, $00, $00, $00, $00, $00    ; Power Bomb
     
-    dw $8700 : db $00, $00, $00, $00, $00, $00, $00, $00    ; Morph ball
+    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C5 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C6 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C7 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00    ; C8 - Unused
@@ -275,8 +275,8 @@ item_graphics:
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 68 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 69 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6A - Unused
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6B - Unused
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6C - Unused
+    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6B - AP foreign prog item
+    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6C - AP foreign junk item
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6D - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6E - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6F - Unused
@@ -375,7 +375,6 @@ sm_item_table:
     dw $89A9, $0005, $0000, $0001, $0000, $0000, $E0CA, #p_missile_hloop    ; Missiles
     dw $89D2, $0005, $0000, $0002, $0000, $0000, $E0EF, #p_super_hloop      ; Super Missiles
     dw $89FB, $0005, $0000, $0003, $0000, $0000, $E114, #p_pb_hloop         ; Power Bombs
-    dw $88F3, $0004, $0009, $0004, $0000, $0000, $0000, $0000      ; Morph ball
 
 progressive_items:
     db $5e, $59, $04, $49, $01, $02, $03, $00     ; Progressive sword
@@ -641,6 +640,10 @@ i_pickup:
     lda.l rando_item_table+$4, x    ; Load item owner into Y
     tay
     lda.l rando_item_table+$2, x    ; Load original item id into X
+    cmp #$006B                      ; 6B is a foreign item that can be progression or not
+    bne +
+    clc : adc.l rando_item_table+$6, x; add one if off-world item isnt progression
+ +
     tax
     pla                             ; Multiworld item table id in A
     phx : phy : pha
@@ -689,6 +692,9 @@ load_item_id:
     lda $1dc7, y                    ; Load PLM room argument
     asl #3 : tax    
     lda.l rando_item_table+$2, x    ; Load item id from table
+    cmp #$006B                      ; 6B is a foreign item that can be progression or not
+    bne .checkItem
+    clc : adc.l rando_item_table+$6, x; add one if off-world item isnt progression
 .checkItem
     jsr check_upgrade_item
     cmp #$00b0                      ; b0+ = SM Item
@@ -1790,7 +1796,7 @@ item_names:
     dw "___       Super Missiles     ___"
     dw "___        Power Bombs       ___"
 
-    dw "___        Something         ___"  ;15
+    dw "___                          ___"  ;15
     dw "___                          ___"  ;16
     dw "___                          ___"  ;17
     dw "___                          ___"  ;18
@@ -1927,8 +1933,8 @@ item_names:
     dw "___                          ___"
     dw "___                          ___"
     dw "___                          ___"
-    dw "___                          ___"
-    dw "___                          ___"
+    dw "___    something useful      ___"
+    dw "___       a junk item        ___"
     dw "___                          ___"
     dw "___                          ___"
     dw "___                          ___" ; 6F
