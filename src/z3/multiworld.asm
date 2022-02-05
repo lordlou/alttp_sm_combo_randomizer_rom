@@ -334,14 +334,6 @@ alttp_multiworld_dialog:
     cmp #$0010
     bne -
 ++
-    tyx
-    lda #$FF00
-    sta.l $7f1200, x
-    sta.l $7f1200+$2, x
-    sta.l $7f1200+$4, x
-    sta.l $7f1200+$6, x
-    tya : clc : adc #$0008 : tay
-
     stz !MULTIWORLD_DIALOG
     stz !MULTIWORLD_DIALOG_ITEM
     stz !MULTIWORLD_DIALOG_PLAYER
