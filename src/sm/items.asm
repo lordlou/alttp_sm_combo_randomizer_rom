@@ -640,9 +640,11 @@ i_pickup:
     lda.l rando_item_table+$4, x    ; Load item owner into Y
     tay
     lda.l rando_item_table+$2, x    ; Load original item id into X
-    cmp #$006B                      ; 6B is a foreign item that can be progression or not
+    cmp #$006B                      ; 6B is a foreign item
     bne +
-    clc : adc.l rando_item_table+$6, x; add one if off-world item isnt progression
+    lda.l rando_item_table+$6, x    ; foreign item name
+    ora #$8000                      ; set high bit
+    dec 
  +
     tax
     pla                             ; Multiworld item table id in A
@@ -694,7 +696,11 @@ load_item_id:
     lda.l rando_item_table+$2, x    ; Load item id from table
     cmp #$006B                      ; 6B is a foreign item that can be progression or not
     bne .checkItem
-    clc : adc.l rando_item_table+$6, x; add one if off-world item isnt progression
+    lda.l rando_item_table+$6, x
+    bit.w #$8000
+    lda.l #$006B
+    bne .checkItem
+    inc                             ; add one if off-world item isnt progression
 .checkItem
     jsr check_upgrade_item
     cmp #$00b0                      ; b0+ = SM Item
@@ -1933,8 +1939,8 @@ item_names:
     dw "___                          ___"
     dw "___                          ___"
     dw "___                          ___"
-    dw "___    something useful      ___"
-    dw "___       a junk item        ___"
+    dw "___                          ___"
+    dw "___                          ___"
     dw "___                          ___"
     dw "___                          ___"
     dw "___                          ___" ; 6F
@@ -2202,6 +2208,8 @@ write_placeholders:
 
 .adjust
     lda $c1                 ; Load item id
+    bit.w #$8000
+    bne .foreignItem
     cmp #$00b0              
     bcc .alttpItem
     sec
@@ -2210,11 +2218,21 @@ write_placeholders:
 .alttpItem
     clc
     adc #$0030
+.foreignItem
 +
+    and #$7FFF               ; remove high bit
     asl #6 : tay
     ldx #$0000
 -
-    lda item_names, y       ; Write item name to box
+    lda $c1                 ; Load item id
+    bit.w #$8000
+    bne +  
+    lda item_names, y         ; Write item name to box
++
+    phx
+    tyx
+    lda.l foreign_item_names, x ; Write item name to box
+    plx
     sta.l $7e3280, x
     inx #2 : iny #2
     cpx #$0040
@@ -2286,6 +2304,112 @@ base $8582E5
 org $c58413
 base $858413
 	DW btn_array
+
+org $F90000
+table box_yellow.tbl,rtl
+foreign_item_names:
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+
+cleartable
 
 namespace off
 
