@@ -697,10 +697,9 @@ load_item_id:
     cmp #$006B                      ; 6B is a foreign item that can be progression or not
     bne .checkItem
     lda.l rando_item_table+$6, x
-    bit.w #$8000
-    lda.l #$006B
-    bne .checkItem
-    inc                             ; add one if off-world item isnt progression
+    lsr #15                         ; add one if off-world item isnt progression
+    clc
+    adc #$006B                           
 .checkItem
     jsr check_upgrade_item
     cmp #$00b0                      ; b0+ = SM Item
@@ -2228,11 +2227,13 @@ write_placeholders:
     bit.w #$8000
     bne +  
     lda item_names, y         ; Write item name to box
+    bra ++
 +
     phx
     tyx
     lda.l foreign_item_names, x ; Write item name to box
     plx
+++    
     sta.l $7e3280, x
     inx #2 : iny #2
     cpx #$0040
