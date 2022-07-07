@@ -201,13 +201,15 @@ AddReceivedItemExpandedGetItem:
 	; If this is a multiworld item for someone else, skip picking the item up and just play
 	; the animation, also, write this item to the outgoing queue
 	lda !MULTIWORLD_PICKUP
-	cmp #$01
+	rep #$30
+	cmp.w #$0001
 	beq .remote_item
-	cmp #$00
+	cmp.w #$0000
 	beq .local_item
 	bra .receive_item
 
 .remote_item
+	sep #$30
 	plx
 
 	pla : pla : pla ; Align the stack by popping the return value off it (so we can JML instead of RTL)
@@ -232,9 +234,11 @@ AddReceivedItemExpandedGetItem:
 	jml $098763		; Skip all code that gives Link the item and just show the graphics
 
 .local_item
+	sep #$30
 	jsl alttp_mw_send_item	 ; Item ID is already stored in !MULTIWORLD_ITEM
 	
 .receive_item
+	sep #$30
 	LDA $02D8 ; check inventory
 	JSL.l FreeDungeonItemNotice
 	CMP.b #$0B : BNE + ; Bow
