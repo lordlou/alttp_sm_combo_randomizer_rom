@@ -69,7 +69,15 @@ alttp_multiworld_replace_item:
 .ownItem
     lda.l alttp_rando_item_table+$2, x
     sta !MULTIWORLD_GIVE_ITEM
+    pha
+    cmp #$006B                      ; 6B is a foreign item
+    bne +
+    lda.l alttp_rando_item_table+$6, x
+    dec
+    ora #$8000                          ; Set high bit so we use alttp_mw_foreign_item_names instead
++
     sta !MULTIWORLD_DIALOG_ITEM
+    pla
 .noReplace
     plp : ply : plx
 .end
@@ -232,16 +240,21 @@ alttp_multiworld_dialog:
 
     ; Item Name
     lda !MULTIWORLD_DIALOG_ITEM
+    bit.w #$8000
+    beq +
+    and #$00ff
+    bra ++
++
     and #$00ff
     cmp #$00b0
     bcc .alttpItem
     sec
     sbc #$00b0
-    bra +
+    bra ++
 .alttpItem
     clc
     adc #$0030
-+
+++
 
     %a8()
     sta $211b : xba : sta $211b
@@ -254,7 +267,15 @@ alttp_multiworld_dialog:
     phx : tyx : lda #$0074 : sta $7f1200, x : plx : iny
 -    
     phx
+
+    lda !MULTIWORLD_DIALOG_ITEM
+    bit.w #$8000
+    beq +
+    lda.l alttp_mw_foreign_item_names, x
+    bra ++
++    
     lda.l alttp_mw_item_names, x
+++
     and #$00ff
     beq ++
     tax
@@ -312,12 +333,12 @@ alttp_multiworld_dialog:
     and #$00ff
     asl #4 : tax
     
+    lda #$0000
 -    
+    pha
     phx
     lda.l rando_player_table, x
     and #$00ff
-    cmp #$0000                  ; FIXME: this will break if we use extended player data (needs to be fixed by then)
-    beq ++
     tax
     lda.l alttp_dialog_char_table-$20, x
     and #$00ff
@@ -327,17 +348,11 @@ alttp_multiworld_dialog:
     iny #2
     plx
     inx
-    bra -
+    pla
+    inc
+    cmp #$0010
+    bne -
 ++
-    plx
-    tyx
-    lda #$FF00
-    sta.l $7f1200, x
-    sta.l $7f1200+$2, x
-    sta.l $7f1200+$4, x
-    sta.l $7f1200+$6, x
-    tya : clc : adc #$0008 : tay
-
     stz !MULTIWORLD_DIALOG
     stz !MULTIWORLD_DIALOG_ITEM
     stz !MULTIWORLD_DIALOG_PLAYER
@@ -514,8 +529,8 @@ alttp_mw_item_names:
     db "                   ", $00
     db "                   ", $00
     db "                   ", $00
-    db "                   ", $00
-    db "                   ", $00
+    db " something useful  ", $00
+    db "    a junk item    ", $00
     db "                   ", $00
     db "                   ", $00
     db "                   ", $00 ; 6F 
@@ -657,3 +672,222 @@ alttp_mw_softreset:
     jsl sm_fix_checksum         ; Fix SRAM checksum (otherwise SM deletes the file on load)
 
     jml $80841C                 ; Jump to SM boot code
+
+org $F91900
+alttp_mw_foreign_item_names:
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00
+    db "                   ", $00 
+    db "                   ", $00

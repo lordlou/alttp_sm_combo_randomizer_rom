@@ -198,7 +198,7 @@ item_graphics:
     dw $C800 : db $03, $03, $03, $03, $03, $03, $03, $03        ; 1E Flippers
     dw $C900 : db $02, $02, $02, $02, $02, $02, $02, $02        ; 1F Moon Pearl
 
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 20 Dummy     
+    dw $B500 : db $01, $01, $01, $01, $01, $01, $01, $01        ; 20 Dummy     
     dw $B800 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 21 Bug-Catching Net
     dw $CD00 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 22 Blue Tunic
     dw $CE00 : db $01, $01, $01, $01, $01, $01, $01, $01        ; 23 Red Tunic
@@ -278,8 +278,8 @@ item_graphics:
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 68 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 69 - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6A - Unused
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6B - Unused
-    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6C - Unused
+    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6B - AP foreign prog item
+    dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6C - AP foreign junk item
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6D - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6E - Unused
     dw $0000 : db $00, $00, $00, $00, $00, $00, $00, $00        ; 6F - Unused
@@ -378,7 +378,6 @@ sm_item_table:
     dw $89A9, $0005, $0000, $0001, $0000, $0000, $E0CA, #p_missile_hloop    ; Missiles
     dw $89D2, $0005, $0000, $0002, $0000, $0000, $E0EF, #p_super_hloop      ; Super Missiles
     dw $89FB, $0005, $0000, $0003, $0000, $0000, $E114, #p_pb_hloop         ; Power Bombs
-
 
 progressive_items:
     db $5e, $59, $04, $49, $01, $02, $03, $00     ; Progressive sword
@@ -636,25 +635,34 @@ i_pickup:
     lda $1dc7, x              ; Load PLM room argument
     asl #3 : tax
 
-    lda.l rando_item_table, x       ; Load item type
-    beq .own_item
+    ; lda.l rando_item_table, x       ; Load item type
+    ; beq .own_item
 
 .multiworld_item                    ; This is someone elses item, send message
     phx
     lda.l rando_item_table+$4, x    ; Load item owner into Y
     tay
     lda.l rando_item_table+$2, x    ; Load original item id into X
+    cmp #$006B                      ; 6B is a foreign item
+    bne +
+    lda.l rando_item_table+$6, x    ; foreign item name
+    ora #$8000                      ; set high bit
+    dec 
+ +
     tax
     pla                             ; Multiworld item table id in A
-    phx : phy
+    phx : phy : pha
     jsl mw_write_message            ; Send message
+    plx
+    lda.l rando_item_table, x       ; Load item type
+    beq .own_item
     ply : plx
     jsl sm_mw_display_item_sent     ; Display custom message box
     plx
     bra .end
 
 .own_item
-    plx
+    ply : plx : plx
     lda !ITEM_PLM_BUF, x        ; Load adjusted item id (progression etc)
     cmp #$0040
     bcc .smItem
@@ -689,6 +697,12 @@ load_item_id:
     lda $1dc7, y                    ; Load PLM room argument
     asl #3 : tax    
     lda.l rando_item_table+$2, x    ; Load item id from table
+    cmp #$006B                      ; 6B is a foreign item that can be progression or not
+    bne .checkItem
+    lda.l rando_item_table+$6, x
+    lsr #15                         ; add one if off-world item isnt progression
+    clc
+    adc #$006B                           
 .checkItem
     jsr check_upgrade_item
     cmp #$00b0                      ; b0+ = SM Item
@@ -2340,7 +2354,9 @@ write_placeholders:
     bra .end
 
 .adjust
-    lda.b $c1                 ; Load item id
+    lda $c1                 ; Load item id
+    bit.w #$8000
+    bne .foreignItem
     cmp #$00b0              
     bcc .alttpItem
     sec
@@ -2349,11 +2365,23 @@ write_placeholders:
 .alttpItem
     clc
     adc #$0030
+.foreignItem
 +
+    and #$7FFF               ; remove high bit
     asl #6 : tay
     ldx #$0000
 -
-    lda.w item_names, y       ; Write item name to box
+    lda $c1                 ; Load item id
+    bit.w #$8000
+    bne +  
+    lda item_names, y         ; Write item name to box
+    bra ++
++
+    phx
+    tyx
+    lda.l foreign_item_names, x ; Write item name to box
+    plx
+++    
     sta.l $7e3280, x
     inx #2 : iny #2
     cpx #$0040
@@ -2369,11 +2397,11 @@ write_placeholders:
     asl : tax               ; Put char table offset in X
     lda.l char_table-$40, x 
     tyx
-    sta.l $7e3314, x
+    sta.l $7e3310, x        ; 16 bytes player name now instead of 12
     iny #2
     plx
     inx
-    cpy #$0018
+    cpy #$0020              ; 16 bytes player name now instead of 12
     bne -
     rep #$30
 
@@ -2425,6 +2453,112 @@ base $8582E5
 org $c58413
 base $858413
 	DW btn_array
+
+org $F90000
+table box_yellow.tbl,rtl
+foreign_item_names:
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+    dw "___                          ___"
+
+cleartable
 
 namespace off
 
