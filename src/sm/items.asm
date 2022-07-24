@@ -826,7 +826,7 @@ receive_sm_item:
 .end
     rts
 
-warnpc $84fe00
+warnpc $850000
 
 org $c498e3
 base $8498e3
@@ -2374,7 +2374,7 @@ write_placeholders:
     lda $c1                 ; Load item id
     bit.w #$8000
     bne +  
-    lda item_names, y         ; Write item name to box
+    lda.w item_names, y         ; Write item name to box
     bra ++
 +
     phx
