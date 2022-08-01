@@ -292,12 +292,12 @@ AddReceivedItemExpandedGetItem:
 	beq .remote_item
 	cmp.w #$0000
 	beq .ownItem
-	
+	sep #$30
 	; Check if we're indoors and increment the dungeon chest counter if so.
 	; Increment it here because the normal item get routine will be skipped.
 	LDA $1b : BEQ +
 	JSR DungeonChestCounterIncrementMain
-	
++	
 	bra .receive_item
 
 .remote_item
@@ -330,7 +330,6 @@ AddReceivedItemExpandedGetItem:
 	jsl alttp_mw_send_item	 ; Item ID is already stored in !MULTIWORLD_ITEM
 	
 .receive_item
-	sep #$30
 	LDA $02D8 ; check inventory
 	JSL.l FreeDungeonItemNotice
 	CMP.b #$0B : BNE + ; Bow
