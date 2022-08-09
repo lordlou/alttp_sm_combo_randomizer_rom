@@ -77,8 +77,8 @@ org $c39a7a
 
 ; This fix simply clears this NMI-ready flag for the duration of the PLM drawing routine.
 ; Place this into the freespace after the free space used by items.asm
-org $c4fe00
-base $84fe00
+org $c4fe2b
+base $84fe2b
 
 drawPlmSafe:
 {
