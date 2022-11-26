@@ -51,6 +51,8 @@ alttp_multiworld_replace_item:
     cmp #$0200 : beq .shop
     bra .noShop
 .shop
+    lda #$0003
+    sta !MULTIWORLD_PICKUP              ; 3 = shop Item
     txa : bra .noReplace
 .noShop
     txa
