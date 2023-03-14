@@ -297,7 +297,7 @@ AddReceivedItemExpandedGetItem:
 	LDA $1b : BEQ +
 	JSR DungeonChestCounterIncrementMain
 
-	; Received item (MULTIWORLD_PICKUP = 2) or Shop Item (MULTIWORLD_PICKUP = 3)
+	; Received item (MULTIWORLD_PICKUP = 2) or local non-item (MULTIWORLD_PICKUP = 3)
 +	
 	bra .receive_item     
 

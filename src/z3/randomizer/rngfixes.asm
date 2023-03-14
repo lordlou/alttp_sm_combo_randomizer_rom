@@ -15,8 +15,6 @@ RigChestRNG:
 	JSL.l DecrementChestCounter
 	LDA $04C4 : CMP.l ChestGameRNG : BEQ .forceHeart
 	.normalItem
-	lda #$03
-    sta !MULTIWORLD_PICKUP              ; 3 = shop Item
 	LDA #$01 : STA !MULTIWORLD_SWAP
 	JSL $0DBA71 ; GetRandomInt
 	AND.b #$07 ; restrict values to 0-7
@@ -32,8 +30,6 @@ RTL
 	
 RTL
 	.notHeart
-	lda #$03
-    sta !MULTIWORLD_PICKUP              ; 3 = shop Item
 	LDA #$01 : STA !MULTIWORLD_SWAP
 	JSL.l DecrementItemCounter
 	;LDA #$00 ; bullshit rupee farming in chest game

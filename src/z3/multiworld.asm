@@ -21,6 +21,12 @@ alttp_multiworld_replace_item:
     CMP.b #$C8 : BEQ .exit                ; Ridley Boss Token
     bra .next
 .exit
+    %ai16()
+    pha
+    lda #$0003
+    sta !MULTIWORLD_PICKUP              ; 3 = local non-item
+    pla
+    %ai8()
     jmp .end
 .next
     phx : phy : php
@@ -52,7 +58,7 @@ alttp_multiworld_replace_item:
     bra .noShop
 .shop
     lda #$0003
-    sta !MULTIWORLD_PICKUP              ; 3 = shop Item
+    sta !MULTIWORLD_PICKUP              ; 3 = local non-item
     txa : bra .noReplace
 .noShop
     txa
@@ -206,7 +212,7 @@ alttp_mw_receive_item:
     lda $7e
     sta.l !MULTIWORLD_DIALOG_PLAYER
     lda #$0002
-    sta.l !MULTIWORLD_PICKUP  ; 1 = pickup multiworld for other player, 2 = get multiworld item from other player
+    sta.l !MULTIWORLD_PICKUP  ; 1 = pickup multiworld for other player, 2 = get multiworld item from other player, 3 = local non-item (shops, fairy ponds,...)
     sta.l !MULTIWORLD_DIALOG  ; dialog 2 = we got item from other player
     %ai8()
     lda #$01
