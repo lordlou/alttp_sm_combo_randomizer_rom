@@ -172,11 +172,11 @@ alttp_mw_handle_queue:
 
 ;    lda.l !SRAM_MW_RPTR
     lda.l !SRAM_MW_ITEMS_RECV_RPTR
-    asl #2 : tax
+    asl #1 : tax
 ;    lda.l !SRAM_MW_RECVQ, x : sta $7e
 ;    lda.l !SRAM_MW_RECVQ+$2, x : sta $7c
-    lda.l !SRAM_MW_ITEMS_RECV, x : sta $7e
-    lda.l !SRAM_MW_ITEMS_RECV+$2, x : sta $7c
+    lda.l !SRAM_MW_ITEMS_RECV, x : and #$00ff : sta $7e
+    lda.l !SRAM_MW_ITEMS_RECV+$1, x : and #$00ff : sta $7c
     jsr alttp_mw_receive_item
 
     lda.l !SRAM_MW_ITEMS_RECV_RPTR

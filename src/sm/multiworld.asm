@@ -102,9 +102,9 @@ sm_mw_handle_queue:
     cmp.l !SRAM_MW_ITEMS_RECV_WPTR
     beq .end
 
-    asl #2 : tax
-    lda.l !SRAM_MW_ITEMS_RECV, x : sta $c3
-    lda.l !SRAM_MW_ITEMS_RECV+$2, x : sta $c1
+    asl #1 : tax
+    lda.l !SRAM_MW_ITEMS_RECV, x : and #$00ff : sta $c3
+    lda.l !SRAM_MW_ITEMS_RECV+$1, x : and #$00ff : sta $c1
     jsr sm_mw_receive_item
 
     lda.l !SRAM_MW_ITEMS_RECV_RPTR

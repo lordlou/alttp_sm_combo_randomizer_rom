@@ -36,12 +36,12 @@
 
 ; New multiworld communication stuff
 !SRAM_MW_ITEMS_RECV = $a26000
-!SRAM_MW_ITEMS_RECV_RPTR = $a26600
-!SRAM_MW_ITEMS_RECV_WPTR = $a26602
-!SRAM_MW_ITEMS_RECV_SPTR = $a26604  ; This gets updated on game save and reloaded into RPTR on game load
+!SRAM_MW_ITEMS_RECV_RPTR = $a26D36
+!SRAM_MW_ITEMS_RECV_WPTR = $a26D38
+!SRAM_MW_ITEMS_RECV_SPTR = $a26D3A  ; This gets updated on game save and reloaded into RPTR on game load
 
-!SRAM_MW_ITEMS_SENT_RPTR = $a26680
-!SRAM_MW_ITEMS_SENT_WPTR = $a26682
-!SRAM_MW_ITEMS_SENT = $a26700       ; [worldId, itemId, itemIndex] (need unique item index to prevent duping)
+!SRAM_MW_ITEMS_SENT_RPTR = $a26D3C
+!SRAM_MW_ITEMS_SENT_WPTR = $a26D3E
+!SRAM_MW_ITEMS_SENT = $a26DA0       ; [itemIndex] (need unique item index to prevent duping)
 
-!SRAM_MW_SEED_DATA = $a266a0
+!SRAM_MW_SEED_DATA = $a26D40

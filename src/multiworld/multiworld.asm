@@ -48,13 +48,13 @@ mw_init:
 mw_write_message:
     pha : phx
     lda.l !SRAM_MW_ITEMS_SENT_WPTR
-    asl #3 : tax
+    asl #1 : tax
     tya
-    sta.l !SRAM_MW_ITEMS_SENT, x
+    ; sta.l !SRAM_MW_ITEMS_SENT, x
     pla
-    sta.l !SRAM_MW_ITEMS_SENT+$2, x
+    ; sta.l !SRAM_MW_ITEMS_SENT+$2, x
     pla
-    sta.l !SRAM_MW_ITEMS_SENT+$4, x
+    sta.l !SRAM_MW_ITEMS_SENT, x         ; +$4, x
 
     lda.l !SRAM_MW_ITEMS_SENT_WPTR
     inc a
