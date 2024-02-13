@@ -89,6 +89,11 @@ macro CheckMSUPresence16(labelToJump)
     BEQ + : jmp <labelToJump> : +
 endmacro
 
+; Hijack SM reset code to mute msu
+org $C08462
+base $808462
+    jml debug_reset_mute_msu
+
 ; Init MSU and check for missing tracks
 org $C08564
     jsl init_msu1
@@ -474,3 +479,13 @@ TrackNeedLooping:
 NoLooping:
     lda.b #$01
     rts
+
+debug_reset_mute_msu:
+    sep #$30
+    lda.b #$00
+    sta.w $2004
+    sta.w $2005
+    REP #$30
+    LDX #$1FFF
+    TCD
+    JML $80846E
