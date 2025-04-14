@@ -77,8 +77,45 @@ init:
     lda #$0000
     tcd
 
+    jsl $80800a                 ; Call the SM SPC upload routine with the parameter set to
+    dl $cf8000                  ; the whole full music engine and samples.
+
+    ;%i8()
     ; Start SPC song
-    jsl playmusic
+    ; jsl playmusic
+
+    phx                    
+    ldx #$000E            
+-
+    stz $0619,x
+    stz $0629,x  ; Music queue entries = music queue timers = 0
+    dex
+    dex
+    bpl -
+    plx
+
+    lda #$0000
+    sta $0639
+    
+    sta $063B   ; Music queue start index = [music queue next index]
+    lda #$0000
+    sta $063F ; Music timer = 0
+    sta $063D ; Music entry = 0
+    
+    lda #$0000
+    jsl $808FC1
+    lda #$FF3C
+    jsl $808FC1
+    lda #$0005
+    ldy #$000E
+    jsl $808FF7
+
+    lda #$0008
+    sta $063F ; Music timer = 8
+    ;lda #$0000
+    ;sta $063D ; Music entry = 0
+
+    ;jsl $80A12B ; Handle music queue for 20 frames
 
     ; Load credits fonts and palettes into VRAM/CGRAM
     %ai16()
@@ -169,11 +206,15 @@ init:
     lda #$80
     sta $4200
 
+    ;jsl $80A12B                 ;  Handle music queue for 20 frames
+
 
 
 .loop
     ; Increase scroll register every "CREDITS_SPEED" amount of frames
     rep #$30
+
+    jsl $808F0C  ; Handle music queue
 
     lda !CREDITS_MODE
     bne .scrollend
@@ -440,6 +481,11 @@ nmi:
     rep #$30
     lda #$0001
     sta !CREDITS_NMI_DONE
+    
+    ;sep #$20
+    ;lda #$00
+    ;sta $05B4
+    ;rep #$20
 
 ;     lda !CREDITS_STREAM_WAIT
 ;     beq +

@@ -14,7 +14,7 @@ org $e9B33C
     jml sm_check_ending_mb_anim
 
 org $cbde80
-    jml sm_setup_credits
+    jml credits_init
 
 
 org $f7fd00
@@ -90,6 +90,9 @@ sm_setup_credits:
 
     ; Reset SPC and put it into upload mode
     jsl zelda_spc_reset
+
+    jsl $80800a                 ; Call the SM SPC upload routine with the parameter set to
+    dl $cf8000                  ; the whole full music engine and samples.
 
     ; Call credits
     jml credits_init
