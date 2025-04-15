@@ -422,6 +422,7 @@ init:
 
 ; Credits NMI routine
 nmi:
+    %a16()
     pha : phx : phy : php
 
     %a8()
