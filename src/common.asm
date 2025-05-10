@@ -86,10 +86,10 @@ reset:              ; Always reset to SM
     jsl mw_init             ; Init multiworld    
 +
     jsl init_randolive      ; Init randolive
-	;jml $80841c
-    %ai16()
-    stz $0998  ;Game state = 0 (reset/start)
-    jml credits_init
+	jml $80841c
+    ;%ai16()
+    ;stz $0998  ;Game state = 0 (reset/start)
+    ;jml credits_init
 
 irq:
     jml irq_fastrom

@@ -18,6 +18,7 @@ namespace "credits"
 !CREDITS_UPDATE_FLAG = $46
 !CREDITS_MODE = $48
 !CREDITS_Y = $20
+!CREDITS_LAST_GAME = $22
 !CREDITS_ADDR = $24
 !CREDITS_VRAM_ADDR = $28
 !CREDITS_NMI_DONE = $0e
@@ -40,6 +41,9 @@ init:
     ; Set data bank register to bank 00
     pea $0000
     plb : plb   
+
+    lda !SRAM_CURRENT_GAME
+    sta !CREDITS_LAST_GAME
 
     ; Direct page to 2100 for HW regs
     lda #$2100
@@ -77,6 +81,12 @@ init:
     lda #$0000
     tcd
 
+    lda !CREDITS_LAST_GAME
+    bne +
+
+    lda #$0027
+    sta $0998                   ; Set game mode to (ending and credits)
+
     jsl $80800a                 ; Call the SM SPC upload routine with the parameter set to
     dl $cf8000                  ; the whole full music engine and samples.
 
@@ -112,11 +122,8 @@ init:
 
     lda #$0008
     sta $063F ; Music timer = 8
-    ;lda #$0000
-    ;sta $063D ; Music entry = 0
 
-    ;jsl $80A12B ; Handle music queue for 20 frames
-
++
     ; Load credits fonts and palettes into VRAM/CGRAM
     %ai16()
     jsr load_graphics
@@ -205,8 +212,6 @@ init:
     ; Turn NMI back on
     lda #$80
     sta $4200
-
-    ;jsl $80A12B                 ;  Handle music queue for 20 frames
 
 
 
@@ -482,11 +487,6 @@ nmi:
     rep #$30
     lda #$0001
     sta !CREDITS_NMI_DONE
-    
-    ;sep #$20
-    ;lda #$00
-    ;sta $05B4
-    ;rep #$20
 
 ;     lda !CREDITS_STREAM_WAIT
 ;     beq +

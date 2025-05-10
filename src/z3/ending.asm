@@ -52,9 +52,6 @@ alttp_setup_credits:
     ; Reset SPC and put it into upload mode
     jsl sm_spc_reset
 
-    jsl $80800a                 ; Call the SM SPC upload routine with the parameter set to
-    dl $cf8000                  ; the whole full music engine and samples.
-
     ; Call credits
     jml credits_init  
 
