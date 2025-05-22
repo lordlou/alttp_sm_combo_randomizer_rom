@@ -76,11 +76,21 @@ init:
 	cpx #$0034    ; while x < $33 ($2133)
 	bne -
 
+    lda $2002 : cmp.b #'S' : bne ++
+        stz.w $2006                                 ; Mute before waiting while MSU-1 is busy
+        lda.b #99 : sta.w $2004 : stz.w $2005
+        - lda.w $2000 : bit.b #$40 : bne -          ; Wait for MSU-1 BUSY
+        lda.w $2000 : bit.b #$08 : bne ++    ; Check MSU-1 Track missing otherwise fall back to SPC
+        lda.b #1 : sta.w $2007                      ; Sets the track to not repeat
+        lda.b #$FF : sta.w $2006                    ; Set to max volume
+        LDA #99 : STA $0332
+    ++
+
     ; Restore zero page
     %ai16()
     lda #$0000
     tcd
-
+    
     lda !CREDITS_LAST_GAME
     bne +
 
@@ -93,9 +103,12 @@ init:
     ;%i8()
     ; Start SPC song
     ; jsl playmusic
-
+    
     phx                    
     ldx #$000E            
+
+    LDA $0332
+    CMP.b #99 : BEQ +
 -
     stz $0619,x
     stz $0629,x  ; Music queue entries = music queue timers = 0

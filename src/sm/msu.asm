@@ -144,13 +144,22 @@ SM_MSU_Main:
     phb
     
     sep #$30
-    
+
     ;; Make sure the data bank is set to $80
     lda #$80
     pha
     plb
     
     %CheckMSUPresence(.Exit)
+
+    LDA !CURRENT_MSU_TRACK
+    CMP.b #99 : BNE +
+    ;; Mute SPC music
+    lda.b #!VAL_COMMAND_MUTE_SPC    
+    - : STA.w APUIO0 : CMP.w APUIO0 : BNE - ; Wait until mute/unmute command is ACK'ed
+    - : STZ.w APUIO0 : LDA.w APUIO0 : BNE - ; Wait until mute/unmute command is completed
+    JMP .Exit
++
     
     ;; Load current requested music
     lda.w !RequestedMusic
@@ -272,7 +281,7 @@ SM_MSU_Main:
     LDA TensionExtendedThemes,X : TAX
     LDY #23
     bra .TryExtended
-
+     
 ; X = Extended Song (00 => Skip to Fallback, FF -> Original Code)
 ; Y = Original Song
 .TryExtended
@@ -325,10 +334,16 @@ SM_MSU_Main:
     AND.b #$01 : BEQ .fallback
 
     .continue
+;     LDA !SRAM_CURRENT_GAME
+;     CMP #17 : BNE +
+;     stz.w !MSU_AUDIO_VOLUME
+;     LDA #99 : BRA .SetAudioValues
+; +
     pla
     tay
     clc : adc.b #!TRACK_OFFSET
 
+.SetAudioValues
     sta.w !CURRENT_MSU_TRACK
     sta.w !MSU_AUDIO_TRACK_LO
     stz.w !MSU_AUDIO_TRACK_HI
