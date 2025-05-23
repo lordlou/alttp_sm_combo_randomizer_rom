@@ -28,6 +28,9 @@
 !SRAM_ALTTP_STATS_BUF = $a17f00 ; to $a17f47
 !SRAM_ALTTP_SMALLKEY_BUF = $a17f50 ; to $a17f5f
 
+!SRAM_MSU_FALLBACK = $a17f60 ; to $a17f7f
+!SRAM_MSU_SEED_DATA = $a17f80 ; to $a17f9f
+
 !SRAM_RANDOLIVE = $a17700   ; to $a178f0
 
 ; !SRAM_MW_RECVQ = $a176b0 ; to $a176ef

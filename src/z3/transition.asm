@@ -109,12 +109,6 @@ transition_to_zelda:
     jsl DecompSwordGfx          ; Update sword graphics
     jsl DecompShieldGfx         ; Update shield graphics
 
-    ; Load starting equipment, pre-open stuff
-    LDA.l !SRAM_ALTTP_FRESH_FILE : BNE +
-        JSL.l OnNewFile
-        LDA.b #$FF : STA.l !SRAM_ALTTP_FRESH_FILE
-    +
-
     lda #$ff
     sta $4201
 
@@ -220,6 +214,10 @@ zelda_spc_reset:
     lda #$ff                    ; Send N-SPC into "upload mode"
     sta $2140
 
+    lda.b #$00
+    sta.w $2007
+    sta.w $2006                 ; Kill MSU-1 music if it's playing
+    
     rep #$30
     lda #$0000
     sta $12
